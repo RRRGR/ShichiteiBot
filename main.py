@@ -13,6 +13,7 @@ SHEET_CS_URL = getenv("SHEET_CS_URL")
 
 
 INITIAL_EXTENSIONS = [
+    "cogs.admin",
     "cogs.IR",
     "cogs.help",
 ]
