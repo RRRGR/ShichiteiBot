@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = getenv("TOKEN")
-# AU_CHAT_ID = int(getenv("AU_CHAT_ID"))
 SHEET_AC_URL = getenv("SHEET_AC_URL")
 SHEET_CS_URL = getenv("SHEET_CS_URL")
 
