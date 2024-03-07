@@ -1,0 +1,7 @@
+.env
+shichiteibot-61a5e2d1ee27.json
+*.pyc
+__pycache__/
+.DS_Store
+.python-version
+venv/

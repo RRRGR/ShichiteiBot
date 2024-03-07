@@ -1,0 +1,4 @@
+discord.py[voice]
+oauth2client
+python-dotenv
+gspread
