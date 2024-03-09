@@ -40,4 +40,4 @@ CS_GAME_LIST = [
     "BMS",
 ]
 
-CIRCLE_LIST = ["B4UT", "京音", "EÜST’", "とんえぼ", "QUaver", "XyHutte", "Wuv NU"]
+CIRCLE_LIST = ["B4UT", "京音", "EÜST’", "とんえぼ", "QUaver", "XyHUtte", "Wuv NU"]
