@@ -187,14 +187,12 @@ class IR(commands.GroupCog, name="ir"):
             range=f"{sort_range_alphabet_1}5:{sort_range_alphabet_2}205",
         )
         cell_list = worksheet.range(5, point_col_loc, 204, point_col_loc)
-        point = 1505
+        point = 2100
         for counter, cell in enumerate(cell_list):
-            if counter <= 30:
-                point -= 5
-            elif counter <= 149:
-                point -= 10
+            if counter < 10:
+                point -= 100
             else:
-                point = 150
+                point = 100
             cell.value = point
         worksheet.update_cells(cell_list)
         return
