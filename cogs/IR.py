@@ -48,11 +48,18 @@ class IR(commands.GroupCog, name="ir"):
             )
             return
 
-    def get_author_col_loc(self, song: str):
-        if song == "上位":
+    def get_author_col_loc(self, worksheet: Worksheet, song: str):
+        song_e3 = worksheet.acell("E3").value
+        song_n3 = worksheet.acell("N3").value
+        song_w3 = worksheet.acell("W3").value
+        if song == song_e3:
             author_col_loc = 3
+        elif song == song_n3:
+            author_col_loc = 12
+        elif song == song_w3:
+            author_col_loc = 21
         else:
-            author_col_loc = 13
+            author_col_loc = 30
         return author_col_loc
 
     async def game_autocomplete(
@@ -86,13 +93,42 @@ class IR(commands.GroupCog, name="ir"):
         else:
             return []
 
+    async def song_autocomplete(
+        self,
+        interaction: discord.Interaction,
+        current: str,
+    ) -> List[app_commands.Choice[str]]:
+        category = interaction.namespace.category
+        game = interaction.namespace.game
+        sheet_url = self.get_sheet_url(category)
+        worksheet = gc.open_by_url(sheet_url).worksheet(game)
+        if worksheet is None:
+            return []
+        song_options = (
+            worksheet.acell("E3").value,
+            worksheet.acell("N3").value,
+            worksheet.acell("W3").value,
+        )
+        if current == "":
+            return [
+                app_commands.Choice(name=song, value=song)
+                for song in song_options
+                if song is not None
+            ]
+        else:
+            return [
+                app_commands.Choice(name=song, value=song)
+                for song in song_options
+                if song is not None and current.lower() in song.lower()
+            ]
+
     @app_commands.command()
-    @app_commands.autocomplete(game=game_autocomplete)
+    @app_commands.autocomplete(game=game_autocomplete, song=song_autocomplete)
     @app_commands.describe(
         circle="所属サークル",
         category="AC or CS",
         game="機種",
-        song="上位 or 下位",
+        song="曲名",
         difficulty="難易度 (1が最難)",
         score="スコア (計算方法は機種によって異なります)",
         result="リザルト画像\n時間と共に撮影できると良い",
@@ -103,7 +139,7 @@ class IR(commands.GroupCog, name="ir"):
         circle: Literal[tuple(CIRCLE_LIST)],
         category: Literal["AC", "CS"],
         game: str,
-        song: Literal["上位", "下位"],
+        song: str,
         difficulty: Literal[1, 2, 3, 4, 5],
         score: float,
         result: discord.Attachment,
@@ -154,7 +190,7 @@ class IR(commands.GroupCog, name="ir"):
         date = interaction.created_at + datetime.timedelta(hours=9)
         date = date.strftime("%Y-%m-%d %H:%M:%S")
 
-        author_col_loc = self.get_author_col_loc(song)
+        author_col_loc = self.get_author_col_loc(worksheet, song)
 
         for i in range(4, 100):
             cell_value = worksheet.cell(i, author_col_loc).value
@@ -168,33 +204,23 @@ class IR(commands.GroupCog, name="ir"):
         worksheet.update_cell(row, author_col_loc + 1, circle)
         worksheet.update_cell(row, author_col_loc + 2, score)
         worksheet.update_cell(row, author_col_loc + 3, difficulty)
-        worksheet.update_cell(row, author_col_loc + 5, date)
-        worksheet.update_cell(row, author_col_loc + 6, url)
+        worksheet.update_cell(row, author_col_loc + 4, date)
+        worksheet.update_cell(row, author_col_loc + 5, url)
         return
 
     def sort_sheet(self, song: str, worksheet: Worksheet) -> None:
-        author_col_loc = self.get_author_col_loc(song)
+        author_col_loc = self.get_author_col_loc(worksheet, song)
         sort_range_alphabet_1 = chr(author_col_loc + 64)
-        sort_range_alphabet_2 = chr(author_col_loc + 70)
+        sort_range_alphabet_2 = chr(author_col_loc + 69)
         score_col_loc = author_col_loc + 2
         diff_col_loc = author_col_loc + 3
-        point_col_loc = author_col_loc + 4
-        date_col_loc = author_col_loc + 5
+        date_col_loc = author_col_loc + 4
         data = worksheet.get
         worksheet.sort(
             (diff_col_loc, "asc"),
             (score_col_loc, "des"),
             range=f"{sort_range_alphabet_1}5:{sort_range_alphabet_2}205",
         )
-        cell_list = worksheet.range(5, point_col_loc, 204, point_col_loc)
-        point = 2100
-        for counter, cell in enumerate(cell_list):
-            if counter < 10:
-                point -= 100
-            else:
-                point = 100
-            cell.value = point
-        worksheet.update_cells(cell_list)
         return
 
     def submission_embed(
@@ -229,7 +255,7 @@ class IR(commands.GroupCog, name="ir"):
         return embed
 
     def get_current_rank(self, author: str, song: str, worksheet: Worksheet) -> int:
-        author_col_loc = self.get_author_col_loc(song)
+        author_col_loc = self.get_author_col_loc(worksheet, song)
         for i in range(4, 100):
             cell_value = worksheet.cell(i, author_col_loc).value
             if cell_value is None:
