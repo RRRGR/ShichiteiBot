@@ -24,7 +24,7 @@ CS_GAME_LIST = [
     "Arcaea(上位)",
     "Arcaea(下位)",
     "プロセカ",
-    "ユメステ(通常)",
+    "ユメステ(STELLA)",
     "ユメステ(OLIVIER)",
     "DEEMO",
     "Cytus",
