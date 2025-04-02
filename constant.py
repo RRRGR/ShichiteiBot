@@ -11,6 +11,7 @@ AC_GAME_LIST = [
     "pop'n music",
     "DDR(SP)",
     "DDR(DP)",
+    "GuitarFreaks",
     "DrumMania",
     "ノスタルジア",
     "CHUNITHM",
